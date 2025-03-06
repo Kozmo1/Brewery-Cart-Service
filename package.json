@@ -1,0 +1,53 @@
+{
+  "name": "brewery-cart-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node src/index.ts",
+    "build": "rimraf dist && npx tsc",
+    "prestart": "npm run build",
+    "start": "node dist/index.js",
+    "preserve": "npm run build",
+    "serve": "cross-env NODE_ENV=local concurrently \"npx tsc -w\"  \"nodemon dist/index.js\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kozmo1/Brewery-Cart-Service.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Kozmo1/Brewery-Cart-Service/issues"
+  },
+  "homepage": "https://github.com/Kozmo1/Brewery-Cart-Service#readme",
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.12.0",
+    "axios": "^1.7.9",
+    "dotenv-safe": "^9.1.0",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "@types/axios": "^0.14.4",
+    "@types/cors": "^2.8.17",
+    "@types/dotenv-safe": "^8.1.6",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "concurrently": "^9.1.2",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "eslint": "^9.20.1",
+    "eslint-config-prettier": "^10.0.1",
+    "prettier": "^3.5.1",
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  }
+}
