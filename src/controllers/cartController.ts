@@ -18,14 +18,18 @@ export class CartController {
 			return;
 		}
 
-		if (req.user?.id !== req.body.user_id.toString()) {
+		console.log("req.user:", req.user);
+		console.log("req.body:", req.body);
+		const userIdFromBody = parseInt(req.body.user_id, 10);
+		if (!req.user || req.user.id !== userIdFromBody) {
 			res.status(403).json({ message: "Unauthorized" });
 			return;
 		}
 
 		try {
 			const inventoryResponse = await axios.get(
-				`${this.breweryApiUrl}/api/inventory/${req.body.inventory_id}`
+				`${this.breweryApiUrl}/api/inventory/${req.body.inventory_id}`,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
 			if (inventoryResponse.data.stockQuantity < req.body.quantity) {
 				res.status(400).json({ message: "Insufficient stock" });
@@ -33,7 +37,8 @@ export class CartController {
 			}
 			const response = await axios.post(
 				`${this.breweryApiUrl}/api/cart/add`,
-				req.body
+				req.body,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
 			res.status(201).json(response.data);
 		} catch (error: any) {
@@ -54,14 +59,15 @@ export class CartController {
 		res: Response,
 		next: NextFunction
 	): Promise<void> {
-		if (req.user?.id !== req.params.user_id) {
+		if (req.user?.id.toString() !== req.params.user_id) {
 			res.status(403).json({ message: "Unauthorized" });
 			return;
 		}
 
 		try {
 			const response = await axios.get(
-				`${this.breweryApiUrl}/api/cart/${req.params.user_id}`
+				`${this.breweryApiUrl}/api/cart/${req.params.user_id}`,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
 			res.status(200).json(response.data);
 		} catch (error: any) {
@@ -88,23 +94,34 @@ export class CartController {
 		}
 
 		try {
+			console.log(`Fetching cart item with id: ${req.params.id}`);
 			const cartItemResponse = await axios.get(
-				`${this.breweryApiUrl}/api/cart/item/${req.params.id}`
+				`${this.breweryApiUrl}/api/cart/item/${req.params.id}`,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
-			if (req.user?.id !== cartItemResponse.data.user_id.toString()) {
+			console.log("Cart item response:", cartItemResponse.data);
+			if (
+				req.user?.id.toString() !==
+				cartItemResponse.data.user_id.toString()
+			) {
 				res.status(403).json({ message: "Unauthorized" });
 				return;
 			}
 			const inventoryResponse = await axios.get(
-				`${this.breweryApiUrl}/api/inventory/${cartItemResponse.data.inventory_id}`
+				`${this.breweryApiUrl}/api/inventory/${cartItemResponse.data.inventory_id}`,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
 			if (inventoryResponse.data.stockQuantity < req.body.quantity) {
 				res.status(400).json({ message: "Insufficient stock" });
 				return;
 			}
+			console.log(
+				`Updating cart item with id: ${req.params.id}, new quantity: ${req.body.quantity}`
+			);
 			const response = await axios.put(
 				`${this.breweryApiUrl}/api/cart/update/${req.params.id}`,
-				req.body
+				req.body,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
 			res.status(200).json(response.data);
 		} catch (error: any) {
@@ -126,14 +143,19 @@ export class CartController {
 	): Promise<void> {
 		try {
 			const cartItemResponse = await axios.get(
-				`${this.breweryApiUrl}/api/cart/item/${req.params.id}`
+				`${this.breweryApiUrl}/api/cart/item/${req.params.id}`,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
-			if (req.user?.id !== cartItemResponse.data.user_id.toString()) {
+			if (
+				req.user?.id.toString() !==
+				cartItemResponse.data.user_id.toString()
+			) {
 				res.status(403).json({ message: "Unauthorized" });
 				return;
 			}
 			const response = await axios.delete(
-				`${this.breweryApiUrl}/api/cart/remove/${req.params.id}`
+				`${this.breweryApiUrl}/api/cart/remove/${req.params.id}`,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
 			res.status(200).json(response.data);
 		} catch (error: any) {
@@ -154,14 +176,15 @@ export class CartController {
 		res: Response,
 		next: NextFunction
 	): Promise<void> {
-		if (req.user?.id !== req.params.user_id) {
+		if (req.user?.id.toString() !== req.params.user_id) {
 			res.status(403).json({ message: "Unauthorized" });
 			return;
 		}
 
 		try {
 			const response = await axios.delete(
-				`${this.breweryApiUrl}/api/cart/clear/${req.params.user_id}`
+				`${this.breweryApiUrl}/api/cart/clear/${req.params.user_id}`,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
 			res.status(200).json({ message: "Cart cleared successfully" });
 		} catch (error: any) {
@@ -181,20 +204,29 @@ export class CartController {
 		res: Response,
 		next: NextFunction
 	): Promise<void> {
-		if (req.user?.id !== req.params.user_id) {
+		console.log("req.user:", req.user);
+		console.log("req.params.user_id:", req.params.user_id);
+		console.log(
+			"Comparison:",
+			req.user?.id.toString(),
+			"vs",
+			req.params.user_id
+		);
+		if (req.user?.id.toString() !== req.params.user_id) {
 			res.status(403).json({ message: "Unauthorized" });
 			return;
 		}
-
 		try {
 			const cartResponse = await axios.get(
-				`${this.breweryApiUrl}/api/cart/${req.params.user_id}`
+				`${this.breweryApiUrl}/api/cart/${req.params.user_id}`,
+				{ headers: { Authorization: req.headers.authorization } }
 			);
 			const cartItems = cartResponse.data;
 			let total = 0;
 			for (const item of cartItems) {
 				const inventoryResponse = await axios.get(
-					`${this.breweryApiUrl}/api/inventory/${item.inventory_id}`
+					`${this.breweryApiUrl}/api/inventory/${item.inventory_id}`,
+					{ headers: { Authorization: req.headers.authorization } }
 				);
 				total += inventoryResponse.data.price * item.quantity;
 			}
